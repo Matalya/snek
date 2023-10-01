@@ -2,6 +2,11 @@
 #include <stdio.h>
 #include <wchar.h>
 
+typedef struct {
+    int x;
+    int y;
+} coords;
+
 const wchar_t ESC = 0x001b;
 const wchar_t TPLF = 0x250c;
 const wchar_t HORI = 0x2500;
@@ -12,7 +17,7 @@ const wchar_t BTRT = 0x2518;
 
 void printBoard(int width, int height) {
     //Print score
-    printf("%lc[42CScore: ??\n", ESC);
+    printf("%lc[33CScore: ??       Direction: →\n", ESC);
 
     //Print top
     printf("%lc", TPLF);
@@ -34,7 +39,13 @@ void printBoard(int width, int height) {
     printf("%lc\n", BTRT);
 }
 
+void printSnek(int x, int y) {
+    printf("%lc[%d;%dH X\n", ESC, y, x);
+    printf("%lc[24;0H", ESC);
+}
+
 int main() {
     setlocale(LC_CTYPE, "");
     printBoard(90, 19);
+    printSnek(15, 8);
 }
