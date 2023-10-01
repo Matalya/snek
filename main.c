@@ -1,30 +1,37 @@
 #include <locale.h>
 #include <stdio.h>
 #include <wchar.h>
+
 const wchar_t ESC = 0x001b;
+const wchar_t TPLF = 0x250c;
+const wchar_t HORI = 0x2500;
+const wchar_t TPRT = 0x2510;
+const wchar_t VERT = 0x2502;
+const wchar_t BTLF = 0x2514;
+const wchar_t BTRT = 0x2518;
 
 void printBoard(int width, int height) {
     //Print score
     printf("%lc[42CScore: ??\n", ESC);
 
     //Print top
-    printf("%lc", 0x250c);
+    printf("%lc", TPLF);
     for (int i = 0; i < width; i++) {
-        printf("%lc", 0x2500);
+        printf("%lc", HORI);
     }
-    printf("%lc\n", 0x2510);
+    printf("%lc\n", TPRT);
 
     //Print the sides
     for (int i = 0; i < height; i++) {
-        printf("%lc%lc[%dC%lc\n", 0x2502, ESC, width, 0x2502);
+        printf("%lc%lc[%dC%lc\n", VERT, ESC, width, VERT);
     }
 
     //Print the bottom
-    printf("%lc", 0x2514);
+    printf("%lc", BTLF);
     for (int i = 0; i < width; i++) {
-        printf("%lc", 0x2500);
+        printf("%lc", HORI);
     }
-    printf("%lc\n", 0x2518);
+    printf("%lc\n", BTRT);
 }
 
 int main() {
