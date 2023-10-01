@@ -7,6 +7,18 @@ typedef struct {
     int y;
 } coords;
 
+typedef enum {
+    UP,
+    LEFT,
+    DOWN,
+    RIGHT,
+} Dir;
+
+typedef struct {
+    coords head;
+    Dir direction;
+} snekHead;
+
 const wchar_t ESC = 0x001b;
 const wchar_t TPLF = 0x250c;
 const wchar_t HORI = 0x2500;
