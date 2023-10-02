@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include "../include/array.h"
 
-Array createArray(size_t size) {
-    Array array = {.address = NO_FUCK_YOU, .size = size};
+Array createArray() {
+    Array array = {.address = NO_FUCK_YOU, .size = 0};
     return array;
 }
 
@@ -101,7 +101,7 @@ size_t findElement(Array array, int value) {
 }
 
 Array cloneArray(Array array) {
-    Array newArray = createArray(0);
+    Array newArray = createArray();
     for (int i = 0; i < array.size; i++) {
         setElement(newArray, i, getElement(array, i));
     }
