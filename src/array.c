@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "array.h"
+#include "../include/array.h"
 
-Array createArray() {
-    Array array = {.address = NO_FUCK_YOU, .size = 0};
+Array createArray(size_t size) {
+    Array array = {.address = NO_FUCK_YOU, .size = size};
     return array;
 }
 
@@ -101,7 +101,7 @@ size_t findElement(Array array, int value) {
 }
 
 Array cloneArray(Array array) {
-    Array newArray = createArray();
+    Array newArray = createArray(0);
     for (int i = 0; i < array.size; i++) {
         setElement(newArray, i, getElement(array, i));
     }

@@ -9,7 +9,7 @@ typedef struct {
 } Array;
 
 //Initializes array
-Array createArray();
+Array createArray(size_t size);
 int index_overflows(Array array, size_t index);
 MaybeInt tryGetElement(Array array, size_t index);
 
