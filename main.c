@@ -1,7 +1,7 @@
 #include <locale.h>
 #include <stdio.h>
 #include <wchar.h>
-#include "../include/array.h"
+#include "array.h"
 
 typedef struct {
     int x;
@@ -59,11 +59,9 @@ void printSnek(int x, int y) {
 
 int main() {
     Array array = createArray();
-    /*
     for (int i = 0; i < 10; i++) {
         addElement(&array, i);
     }
-    */
     printArray(array);
     setlocale(LC_CTYPE, "");
     printBoard(90, 19);

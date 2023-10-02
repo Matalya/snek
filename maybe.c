@@ -1,5 +1,5 @@
 #include <stddef.h>
-#include "../include/maybe.h"
+#include "maybe.h"
 
 MaybeInt some_int(int integer) {
     MaybeInt maybeInt = {
