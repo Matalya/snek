@@ -28,6 +28,13 @@ const wchar_t VERT = 0x2502;
 const wchar_t BTLF = 0x2514;
 const wchar_t BTRT = 0x2518;
 
+coords* makecoord(int x, int y) {
+    coords* coord = malloc(sizeof(coords));
+    coord->x = x;
+    coord->x = y;
+    return coord;
+}
+
 void printBoard(int width, int height) {
     //Print score
     printf("%lc[33CScore: ??       Direction: →\n", ESC);
@@ -53,13 +60,14 @@ void printBoard(int width, int height) {
 }
 
 void printSnek(int x, int y) {
-    printf("%lc[%d;%dH X\n", ESC, y, x);
+    printf("%lc[%d;%dHX\n", ESC, y, x);
     printf("%lc[24;0H", ESC);
 }
 
 int main() {
-    
+    coords* CENTER = makecoord(1, 2);
     setlocale(LC_CTYPE, "");
     printBoard(90, 19);
-    printSnek(15, 8);
+    printSnek(1, 1);
+    
 }
