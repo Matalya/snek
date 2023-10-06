@@ -1,6 +1,7 @@
 #include <locale.h>
 #include <stdio.h>
 #include <wchar.h>
+#include "circular_array.h"
 
 typedef struct {
     int x;
