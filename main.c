@@ -31,7 +31,7 @@ const wchar_t BTRT = 0x2518;
 coords* makecoord(int x, int y) {
     coords* coord = malloc(sizeof(coords));
     coord->x = x;
-    coord->x = y;
+    coord->y = y;
     return coord;
 }
 
