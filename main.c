@@ -59,15 +59,16 @@ void printBoard(int width, int height) {
     printf("%lc\n", BTRT);
 }
 
-void printSnek(int x, int y) {
-    printf("%lc[%d;%dHX\n", ESC, y, x);
+void printSnek(coords* coords, int thechar) {
+    printf("%lc[%d;%dH%d\n", ESC, coords->y, coords->x, thechar);
     printf("%lc[24;0H", ESC);
 }
 
 int main() {
-    coords* CENTER = makecoord(1, 2);
+    coords* CENTER = makecoord(46, 13);
     setlocale(LC_CTYPE, "");
     printBoard(90, 19);
-    printSnek(1, 1);
-    
+    for (int i = 1; i < 30; i++) {
+        printSnek(makecoord(i, i), i);
+    }
 }
