@@ -1,19 +1,19 @@
 #include <stdio.h>
 #include "circular_array.h"
 
-int is_circ_full(Circle* circle) {
+bool is_circ_full(Circle* circle) {
     return circle->head == (circle->tail + 1) % circle->capacity;
 }
 
 //All empty circles are initialized with head and tail = -1.
-int is_circ_empty(Circle* circle) {
+bool is_circ_empty(Circle* circle) {
     return circle->head == -1;
 }
 
 //Initializes a circle and returns a pointer to it.
 Circle* initCircle(size_t size) {
     Circle* circle = malloc(sizeof(Circle));
-    circle->array = malloc(sizeof(int) * size);
+    circle->array = malloc(sizeof(coords) * size);
     circle->head = circle->tail = -1;
     circle->capacity = size;
     circle->length = 0;
@@ -23,7 +23,7 @@ Circle* initCircle(size_t size) {
 //Prints the contents together with markers for head and tail.
 void printCircle(Circle* circle) {
     int cap = circle->capacity;
-    int* array = circle->array;
+    coords* array = circle->array;
     int head = circle->head;
     int tail = circle->tail;
     printf("[");
@@ -34,7 +34,7 @@ void printCircle(Circle* circle) {
         if (i == head) {
             printf("<");
         }
-        printf("%d", array[i]);
+        printf("%d, %d", array[i].x, array[i].y);
         if (i == tail) {
             printf(">");
         }
@@ -95,7 +95,7 @@ void emptyCircle(Circle* circle) {
 //If full, the circle is replaced for one double its size
 //
 //And returned back.
-Circle* enqueueItemSafe(Circle* circle, int value) {
+Circle* enqueueItemSafe(Circle* circle, coords value) {
     if (is_circ_full(circle)) {
         circle = doubleCircleCapacity(circle);
     } else if (is_circ_empty(circle)) {
@@ -110,7 +110,7 @@ Circle* enqueueItemSafe(Circle* circle, int value) {
 //Adds an item according to the FIFO principle.
 //
 //If full, it'll simply overwrite the last item.
-void enqueueItem(Circle* circle, int value) {
+void enqueueItem(Circle* circle, coords value) {
     if (is_circ_full(circle) || is_circ_empty(circle)) {
         circle->head++;
     }
@@ -122,7 +122,7 @@ void enqueueItem(Circle* circle, int value) {
 //Returns the first element of the circle. Contains no
 //
 //error handling.
-int peekCircle(Circle* circle) {
+coords peekCircle(Circle* circle) {
     return circle->array[circle->head];
 }
 
@@ -130,25 +130,23 @@ int peekCircle(Circle* circle) {
 //Eliminates an item according to the FIFO
 //
 //principle. Returns a 0 if failure, 1 if success.
-int dequeueItem(Circle* circle) {
+bool dequeueItem(Circle* circle) {
     if (is_circ_empty(circle)) {
-        return 0;
+        return false;
     }
     if (circle->head == circle->tail) {
         emptyCircle(circle);
     } else {
-        circle->array[circle->head] = 0;
         circle->head = (circle->head + 1) % circle->capacity;
         circle->length--;
     }
-    return 1;
+    return true;
 }
 //Sister function to dequeue item. It returns the dequeued
 //
 //item. Has no error handling cuz I can't be bothered anymore.
-int ripLastItemOff(Circle* circle) {
-    int item = circle->array[circle->head];
-    circle->array[circle->head] = 0;
+coords ripLastItemOff(Circle* circle) {
+    coords item = circle->array[circle->head];
     circle->head = (circle->head + 1) % circle->capacity;
     circle->length--;
     return item;
@@ -158,7 +156,7 @@ int ripLastItemOff(Circle* circle) {
 void printArray(Circle* circle) {
     printf("[");
     for (int i = 0; i < circle->capacity; i++) {
-        printf("%d", circle->array[i]);
+        printf("%d, %d", circle->array[i].x, circle->array[i].y);
         if (i < circle->capacity - 1) {
             printf(", ");
         }
@@ -168,5 +166,8 @@ void printArray(Circle* circle) {
 
 //Sister function to peekCircle(). Prints the tail with its index.
 void printTail(Circle* circle) {
-    printf("%d: %d", circle->tail, circle->array[circle->tail]);
+    coords item = circle->array[circle->tail];
+    int x = item.x;
+    int y = item.y;
+    printf("%d: %d, %c", circle->tail, x, y);
 }

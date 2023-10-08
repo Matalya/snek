@@ -1,11 +1,18 @@
 #pragma once
 #include <stdlib.h>
+#include <stdbool.h>
+
+//Coordinates type
+typedef struct {
+    int x;
+    int y;
+} coords;
 
 //Contains a head and tail int, a size_t length
 //
 //and a pointer to a (heap-assumed) array.
 typedef struct {
-    int* array;
+    coords* array;
     int head;
     int tail;
     size_t capacity;
@@ -15,10 +22,10 @@ typedef struct {
 //When a circle is full, that means that items have
 //
 //been added until the tail came right by the head.
-int is_circ_full(Circle* circle);
+bool is_circ_full(Circle* circle);
 
 //All empty circles are initialized with head and tail = -1.
-int is_circ_empty(Circle* circle);
+bool is_circ_empty(Circle* circle);
 
 //Initializes a circle and returns a pointer to it.
 Circle* initCircle(size_t size);
@@ -50,27 +57,27 @@ void emptyCircle(Circle* circle);
 //If full, the circle is replaced for one double its size
 //
 //And returned back.
-Circle* enqueueItemSafe(Circle* circle, int value);
+Circle* enqueueItemSafe(Circle* circle, coords value);
 
 //Adds an item according to the FIFO principle.
 //
 //If full, it'll simply overwrite the last item.
-void enqueueItem(Circle* circle, int value);
+void enqueueItem(Circle* circle, coords value);
 
 //Returns the first element of the circle. Contains no
 //
 //error handling.
-int peekCircle(Circle* circle);
+coords peekCircle(Circle* circle);
 
 
 //Eliminates an item according to the FIFO
 //
 //principle. Returns a 0 if failure, 1 if success.
-int dequeueItem(Circle* circle);
+bool dequeueItem(Circle* circle);
 //Sister function to dequeue item. It returns the dequeued
 //
 //item. Has no error handling cuz I can't be bothered anymore.
-int ripLastItemOff(Circle* circle);
+coords ripLastItemOff(Circle* circle);
 
 //Raw print array function. Prints the content of the allocation.
 void printArray(Circle* circle);

@@ -21,23 +21,12 @@ struct termios *become_fanon(struct termios *original, struct termios *modified)
   return original;
 }
 
-
-typedef struct {
-    int x;
-    int y;
-} coords;
-
 typedef enum {
     UP,
-    LEFT,
     DOWN,
+    LEFT,
     RIGHT,
 } Dir;
-
-typedef struct {
-    coords head;
-    Dir direction;
-} snekHead;
 
 const int BOARD_WIDTH = 91;
 const int BOARD_HEIGHT = 25;
@@ -62,10 +51,11 @@ const wchar_t TPAR = 0x2191;
 const wchar_t RTAR = 0x2192;
 const wchar_t DWAR = 0x2193;
 
-coords* makecoord(int x, int y) {
-    coords* coord = malloc(sizeof(coords));
-    coord->x = x;
-    coord->y = y;
+coords makecoord(int x, int y) {
+    coords coord = {
+        .x = x,
+        .y = y,
+    };
     return coord;
 }
 
@@ -121,16 +111,16 @@ void printBoard(Dir dir) {
     printf("%lc[%d;1H", ESC, BOARD_HEIGHT+1);
 }
 
-void printSnek(coords* coords, wchar_t thechar) {
-    printf("%lc[%d;%dH%lc\n", ESC, coords->y, coords->x, thechar);
-    printf("%lc[24;0H", ESC);
+void printSnek(coords coords, wchar_t thechar) {
+    printf("%lc[%d;%dH%lc\n", ESC, coords.y, coords.x, thechar);
+    printf("%lc[%d;0H", ESC, BOARD_HEIGHT + 1);
 }
 
 
 
-int gameover(coords* pos) {
+int gameover(coords pos) {
     int gamestate = 0;
-    if ((pos->x == 0 || pos->x == BOARD_WIDTH + 1) || (pos->y == 2 || pos->y == BOARD_HEIGHT + 1)) {
+    if ((pos.x == 0 || pos.x == BOARD_WIDTH + 1) || (pos.y == 2 || pos.y == BOARD_HEIGHT + 1)) {
         gamestate = 1;
     }
     return gamestate;
@@ -160,7 +150,7 @@ typedef enum {
     KEY_RIGHT = 100,
 } UserInput;
 
-Dir pickDirFromInput(int input) {
+Dir pickDirFromInput(int input, Dir currentDir) {
     switch (input) {
         case KEY_UP:
             return UP;
@@ -174,27 +164,49 @@ Dir pickDirFromInput(int input) {
         case KEY_RIGHT:
             return RIGHT;
             break;
+        default:
+            return currentDir;
+            break;
     }
 }
 
+//Detects if a keyboard hit has occured. Returns TRUE if so.
+int kbhit(void) {
+    struct timeval tv;
+    fd_set rdfs;
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+    FD_ZERO(&rdfs);
+    FD_SET(STDIN_FILENO, &rdfs);
+    select(STDIN_FILENO + 1, &rdfs, NULL, NULL, &tv);
+    return FD_ISSET(STDIN_FILENO, &rdfs);
+}
+
+
 int main() {
+    //Setting up some shit, Idk what it's doing.
     struct termios original, modified;
     struct termios *originalptr;
     originalptr = become_fanon(&original, &modified);
     setlocale(LC_CTYPE, "");
-    
+
     Dir snekdir = RIGHT;
-    coords* CENTER = makecoord(46, 13);
-    coords* snekpos = CENTER;
+    coords CENTER = makecoord(46, 13);
+    coords snekpos = CENTER;
+
+    Circle* snekBody = initCircle(1);
+    enqueueItem(snekBody, snekpos);
+    
     printBoard(snekdir);
-    int input;
     
     while (!gameover(snekpos)) {
-        snekdir = pickDirFromInput(getchar());
+        //Detect keystrokes and updates direction.
+        if (kbhit()) {snekdir = pickDirFromInput(getchar(), snekdir);}
         printBoard(snekdir);
         printSnek(snekpos, FLBK);
-        updatePos(snekdir, snekpos);
-        usleep(100000);
+        updatePos(snekdir, &snekpos);
+        enqueueItem(snekBody, snekpos);
+        usleep(snekdir < 2?150000:100000);
     }
     printSnek(snekpos, ' ');
     printf("%lc[13;41HGAME OVER%lc[26;1H", ESC, ESC);
