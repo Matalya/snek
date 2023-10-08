@@ -133,9 +133,7 @@ void updatePos(Dir dir, coords* pos) {
 }
 
 int main() {
-    int BOARD_WIDTH = 91;
-    int BOARD_HEIGHT = 25;
-    Dir snekdir = DOWN;
+    Dir snekdir = RIGHT;
     coords* CENTER = makecoord(46, 13);
     coords* snekpos = CENTER;
     setlocale(LC_CTYPE, "");
