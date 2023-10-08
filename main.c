@@ -4,6 +4,7 @@
 #include "circular_array.h"
 #include <unistd.h>
 #include <stdlib.h>
+#include <time.h>
 #include <termios.h>
 
 #define fori(x) for (int i = 0; i < x; i++)
@@ -49,6 +50,7 @@ const wchar_t LFAR = 0x2190;
 const wchar_t TPAR = 0x2191;
 const wchar_t RTAR = 0x2192;
 const wchar_t DWAR = 0x2193;
+const wchar_t CRCL = 0x25CF;
 
 coords makecoord(int x, int y) {
     coords coord = {
@@ -111,7 +113,15 @@ void printBoard(Dir dir) {
     printf("%lc[%d;1H", ESC, BOARD_HEIGHT+1);
 }
 
-void printSnek(coords coords, wchar_t thechar) {
+void printSnek(Circle* circle, int length, wchar_t thechar) {
+    for (int i = 0; i < length; i++) {
+        coords item = circle->array[circle->head + i % circle->capacity];
+        printf("%lc[%d;%dH%lc", ESC, item.y, item.x, thechar);
+    }
+    printf("%lc[%d;0Hhead: %d tail: %d", ESC, BOARD_HEIGHT + 1, circle->head, circle->tail);
+}
+
+void printAppl(coords coords, wchar_t thechar) {
     printf("%lc[%d;%dH%lc\n", ESC, coords.y, coords.x, thechar);
     printf("%lc[%d;0H", ESC, BOARD_HEIGHT + 1);
 }
@@ -182,35 +192,58 @@ int kbhit(void) {
     return FD_ISSET(STDIN_FILENO, &rdfs);
 }
 
+bool equal_coords(coords a, coords b) {
+    return a.x == b.x && a.y == b.y;
+}
+
+coords pickFruitPos(coords original) {
+    int x = 1 + (rand() % (BOARD_WIDTH - 1));
+    int y = 4 + (rand() % (BOARD_HEIGHT - 4));
+    coords coord = makecoord(x, y);
+    return coord;
+}
+
 
 int main() {
     //Setting up some shit, Idk what it's doing.
     struct termios original, modified;
     become_fanon(&original, &modified);
     setlocale(LC_CTYPE, "");
+    srand(time(NULL));
 
-    Dir snekdir = RIGHT;
+    Dir snekDir = RIGHT;
     coords CENTER = makecoord(46, 13);
-    coords snekpos = CENTER;
+    coords snekPos = CENTER;
+    int snekLength = 1;
 
     Circle* snekBody = initCircle(1);
-    enqueueItem(snekBody, snekpos);
+    enqueueItem(snekBody, snekPos);
     
-    printBoard(snekdir);
+    printBoard(snekDir);
+    coords fruitPos = makecoord(75, 13);
     
-    while (!gameover(snekpos)) {
+    while (!gameover(snekPos)) {
         //Detect keystrokes and updates direction.
-        if (kbhit()) {snekdir = pickDirFromInput(getchar(), snekdir);}
+        if (kbhit()) {snekDir = pickDirFromInput(getchar(), snekDir);}
+        
+        updatePos(snekDir, &snekPos);
+        enqueueItem(snekBody, snekPos);
+        if (equal_coords(snekPos, fruitPos)) {
+            printf("%lc[%d;%dHchomp", ESC, CENTER.y, CENTER.x);
+            fruitPos = pickFruitPos(fruitPos);
+            snekLength++;
+            enqueueItemSafe(snekBody, snekPos);
+        }
+        printArray(snekBody);
         clearGameArea();
-        printBoard(snekdir);
-        printSnek(snekpos, FLBK);
-        updatePos(snekdir, &snekpos);
-        enqueueItem(snekBody, snekpos);
-        usleep(snekdir < 2?150000:100000);
+        printBoard(snekDir);
+        printAppl(fruitPos, CRCL);
+        printSnek(snekBody, snekLength, FLBK);
+        usleep(snekDir < 2?130000:100000);
     }
     clearGameArea();
-    printBoard(snekdir);
-    printSnek(snekpos, 'X');
+    printBoard(snekDir);
+    printSnek(snekBody, 1, 'X');
     printf("%lc[13;41HGAME OVER%lc[26;1H", ESC, ESC);
     
     // Restore the original terminal settings
