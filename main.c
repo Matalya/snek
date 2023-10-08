@@ -3,7 +3,24 @@
 #include <wchar.h>
 #include "circular_array.h"
 #include <unistd.h>
+#include <stdlib.h>
+#include <termios.h>
+
 #define fori(x) for (int i = 0; i < x; i++)
+
+struct termios *become_fanon(struct termios *original, struct termios *modified) {
+  // Get the original terminal settings
+  tcgetattr(STDIN_FILENO, original);
+  modified = original;
+
+  // Disable canonical mode and echoing
+  modified->c_lflag &= ~(ICANON | ECHO);
+
+  // Set the new terminal settings
+  tcsetattr(STDIN_FILENO, TCSANOW, modified);
+  return original;
+}
+
 
 typedef struct {
     int x;
@@ -26,16 +43,20 @@ const int BOARD_WIDTH = 91;
 const int BOARD_HEIGHT = 25;
 
 const wchar_t ESC = 0x001b;
+//Block building
 const wchar_t TPLF = 0x250c;
 const wchar_t HORI = 0x2500;
 const wchar_t TPRT = 0x2510;
 const wchar_t VERT = 0x2502;
 const wchar_t BTLF = 0x2514;
 const wchar_t BTRT = 0x2518;
+//Full black
 const wchar_t FLBK = 0x2588;
+//Black square
 const wchar_t BLCK = 0x25A0;
 const wchar_t UPPERHALFBLOCK = 0x2580;
 const wchar_t BVRC = 0x25AE;
+//Direction arrows
 const wchar_t LFAR = 0x2190;
 const wchar_t TPAR = 0x2191;
 const wchar_t RTAR = 0x2192;
@@ -109,7 +130,7 @@ void printSnek(coords* coords, wchar_t thechar) {
 
 int gameover(coords* pos) {
     int gamestate = 0;
-    if ((pos->x == 1 || pos->x == BOARD_WIDTH + 1) || (pos->y == 1 || pos->y == BOARD_HEIGHT + 1)) {
+    if ((pos->x == 0 || pos->x == BOARD_WIDTH + 1) || (pos->y == 2 || pos->y == BOARD_HEIGHT + 1)) {
         gamestate = 1;
     }
     return gamestate;
@@ -132,21 +153,53 @@ void updatePos(Dir dir, coords* pos) {
     }
 }
 
+typedef enum {
+    KEY_UP = 119,
+    KEY_LEFT = 97,
+    KEY_DOWN = 115,
+    KEY_RIGHT = 100,
+} UserInput;
+
+Dir pickDirFromInput(int input) {
+    switch (input) {
+        case KEY_UP:
+            return UP;
+            break;
+        case KEY_DOWN:
+            return DOWN;
+            break;
+        case KEY_LEFT:
+            return LEFT;
+            break;
+        case KEY_RIGHT:
+            return RIGHT;
+            break;
+    }
+}
+
 int main() {
+    struct termios original, modified;
+    struct termios *originalptr;
+    originalptr = become_fanon(&original, &modified);
+    setlocale(LC_CTYPE, "");
+    
     Dir snekdir = RIGHT;
     coords* CENTER = makecoord(46, 13);
     coords* snekpos = CENTER;
-    setlocale(LC_CTYPE, "");
     printBoard(snekdir);
+    int input;
     
-    int game_over = gameover(snekpos);
-    while (!game_over) {
+    while (!gameover(snekpos)) {
+        snekdir = pickDirFromInput(getchar());
         printBoard(snekdir);
-        printSnek(snekpos, BVRC);
+        printSnek(snekpos, FLBK);
         updatePos(snekdir, snekpos);
-        usleep(50000);
-        game_over = gameover(snekpos);
+        usleep(100000);
     }
     printSnek(snekpos, ' ');
     printf("%lc[13;41HGAME OVER%lc[26;1H", ESC, ESC);
+    
+    // Restore the original terminal settings
+    tcsetattr(STDIN_FILENO, TCSANOW, originalptr);
+    return 0;
 }
