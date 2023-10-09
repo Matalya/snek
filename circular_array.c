@@ -1,8 +1,12 @@
 #include <stdio.h>
 #include "circular_array.h"
 
+size_t circIndex(Circle* circle, size_t index) {
+    return (circle->head + index) % circle->capacity;
+}
+
 bool is_circ_full(Circle* circle) {
-    return circle->head == (circle->tail + 1) % circle->capacity;
+    return circle->length == circle->capacity;
 }
 
 //All empty circles are initialized with head and tail = -1.
@@ -28,6 +32,7 @@ void printCircle(Circle* circle) {
     int tail = circle->tail;
     printf("[");
     for (int i = 0; i < cap; i++) {
+        i = circIndex(circle, i);
         if (is_circ_empty(circle)) {
             break;
         }
@@ -55,13 +60,12 @@ Circle* doubleCircleCapacity(Circle* circle) {
         int copyFrom = circle->head;
         int copyTo = 0;
 
-        do {
-            newCircle->array[copyTo++] = circle->array[copyFrom];
-            copyFrom = (copyFrom + 1) % circle->capacity;
-        } while (copyFrom != circle->head);
-
+        for (int i = 0; i < circle->length; i++) {
+            i = circIndex(circle, i);
+            newCircle->array[i] = circle->array[i];
+        }
         newCircle->head = 0;
-        newCircle->tail = circle->capacity - 1;
+        newCircle->tail = circle->length;
     }
 
     free(circle);
@@ -103,7 +107,9 @@ Circle* enqueueItemSafe(Circle* circle, coords value) {
     }
     circle->tail = (circle->tail + 1) % circle->capacity;
     circle->array[circle->tail] = value;
-    circle->length++;
+    if (is_circ_full(circle)) {
+        circle->length++;
+    }
     return circle;
 }
 
@@ -116,7 +122,9 @@ void enqueueItem(Circle* circle, coords value) {
     }
     circle->tail = (circle->tail + 1) % circle->capacity;
     circle->array[circle->tail] = value;
-    circle->length++;
+    if (circle->length < circle->capacity){
+        circle->length++;
+    }
 }
 
 //Returns the first element of the circle. Contains no

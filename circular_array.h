@@ -19,6 +19,9 @@ typedef struct {
     size_t length;
 } Circle;
 
+//Converts a given index to a wrapable index.
+size_t circIndex(Circle* circle, size_t index);
+
 //When a circle is full, that means that items have
 //
 //been added until the tail came right by the head.
