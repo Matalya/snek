@@ -9,3 +9,6 @@ IndentWidth: 4
 PointerAlignment: Left
 TabWidth: 4
 UseTab: Never
+SpacesInLineComment:
+  Minimum: 0
+  Maximum: 0
